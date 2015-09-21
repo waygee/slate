@@ -123,4 +123,4 @@ Parameter | Req | Value | Description
 {jobId} | Y | "" | The job id of a previously submitted job.  If the job id is not provided, then the endpoint will return the status of all jobs.
 
 ### Return
-If the request succeeded, then HTTP 202 is returned along with COMPLETE message.  Errors during parsing are shown in an error array.
+If the request succeeded, then HTTP 202 is returned along with COMPLETE message.
