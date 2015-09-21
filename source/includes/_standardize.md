@@ -16,9 +16,6 @@ A great overview table of standard vocabularies and the data elements that are c
  The standard vocabularies to be mapped to are
 given below:
 
- The standard vocabularies to be mapped to are
-given below:
-
 |C-CDA section |        Data Elements   |Standard Vocabulary|
 |-------------|:-------------:|---------------:|
 |Demographics           |Demographics | N/A                         |
@@ -47,3 +44,83 @@ given below:
 |       |participant    |HL7 role|
 |       |performer      |HL7 role|
 |       |authorization->procedure|      SNOMED CT|
+
+This endpoint will be able to map to and from the following set of standards:
+
+* From ICD-9 to SNOMED-CT
+* From ICD-10 to SNOMED-CT
+* From CPT to LOINC
+
+## Standardize All Records
+
+```shell
+# Standardize All Records
+
+curl -X "POST" "http://example.com/rest/v1/syrinx/standardize-data" \
+        -H "Content-Type: application/json" \
+        -H "clientToken: 123456789" \
+        -d $'{
+    "dataType" : "query",
+    "data" : "",
+    "dataFormat"   : "xml",
+    "callback_url" : ""
+}'
+```
+```shell
+# JSON Result
+
+{
+    "jobId": "JOB1442337673507",
+    "message": "Accepted",
+    "status": 202
+}
+```
+
+### Request
+
+`POST http://example.com/rest/v1/syrinx/standardize-data`
+
+### Parameters
+
+Parameter | Req | Value | Description
+--------- | ------- | ------ | -----------
+dataType | Y | "query" | Indicates whether the data is embedded or is a MongoDB query.
+data | Y | "" | Empty query runs through entire database.  Only query that is supported right now is empty.
+dataFormat | Y | "xml" | 
+callback_url | N | "http://example.com/url" | Used to call back an endpoint with the status of the request
+
+### Return
+If the request succeeded, then HTTP 202 is returned along with a job id, meaning that the job was accepted for processing.
+
+## Status of Standardize
+
+```shell
+# Get the Status
+
+curl -X "GET" "http://example.com/rest/v1/syrinx/standardize-data/status/JOB1442862119598" \
+        -H "Content-Type: application/json" \
+        -H "clientToken: 123456789" \
+        -d "{}"
+```
+```shell
+# JSON Result
+[
+    {
+        "message": "COMPLETE",
+        "status": 202,
+        "data": []
+    }
+]
+```
+### Request
+
+`GET http://example.com/rest/v1/syrinx/ingest-data/status/{jobId}`
+
+### Parameters
+
+Parameter | Req | Value | Description
+--------- | ------- | ------ | -----------
+{jobId} | Y | "" | The job id of a previously submitted job.  If the job id is not provided, then the endpoint will return the status of all jobs.
+
+### Return
+If the request succeeded, then HTTP 202 is returned along with COMPLETE message.  Errors during parsing are shown in an error array.

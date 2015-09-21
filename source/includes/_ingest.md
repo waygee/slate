@@ -1,7 +1,6 @@
 # Ingest
 The ingest data endpoints are used to add data into the patient data store, any external EMR/EHR systems data can be imported into this patient data store using this API.
 
-## Ingest Formats Accepted
 The ingest process uses the Blue Button Parser to convert complex data formats to JSON formats.  Currently 
 BlueButton supports the C32, CMS, and CCDA data formats.  The following formats: CCDA, C32, CDA are expressed using the xml data standard.
 
@@ -238,7 +237,7 @@ IngestObject output = ingest.status();
 
 Parameter | Req | Value | Description
 --------- | ------- | ------ | -----------
-{jobId} | N | "" | The job id of a previously submitted job.  If the job id is not provided, then the endpoint will return the status of all jobs.
+{jobId} | Y | "" | The job id of a previously submitted job.
 
 ### Return
 If the request succeeded, then HTTP 202 is returned along with COMPLETE message.  Errors during parsing are shown in an error array.
@@ -297,10 +296,6 @@ curl -X "GET" "http://example.com/rest/v1/syrinx/ingest-data/status/JOB144257433
         ]
     }
 ]
-
-
-
-
 ```
 
 ```javascript
@@ -310,6 +305,11 @@ curl -X "GET" "http://example.com/rest/v1/syrinx/ingest-data/status/JOB144257433
 ```
 
 ## Ingest Embedded Data
+
+```shell
+# Need Examples Here
+```
+
 ### Request
 
 `POST http://example.com/rest/v1/syrinx/ingest-data`
@@ -327,6 +327,10 @@ callback_url | N | "http://example.com/url" | Used to call back an endpoint with
 If the request succeeded, then HTTP 202 is returned along with a job id, meaning that the job was accepted for processing.
 
 ## Status of Ingest
+
+```shell
+# Do we need examples here again?
+```
 
 ### Status of All Jobs
 `GET http://example.com/rest/v1/syrinx/ingest-data/status`

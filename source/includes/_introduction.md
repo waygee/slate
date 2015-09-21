@@ -17,6 +17,7 @@ Supported Languages are:
 Please see the instructions for installing your desired client library by selecting the language on the right.
 
 ```shell
+# No client libraries are required for cURL
 ```
 
 ```javascript
