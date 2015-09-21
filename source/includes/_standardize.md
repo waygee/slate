@@ -114,7 +114,7 @@ curl -X "GET" "http://example.com/rest/v1/syrinx/standardize-data/status/JOB1442
 ```
 ### Request
 
-`GET http://example.com/rest/v1/syrinx/ingest-data/status/{jobId}`
+`GET http://example.com/rest/v1/syrinx/standardize-data/status/{jobId}`
 
 ### Parameters
 
