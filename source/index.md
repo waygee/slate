@@ -1,10 +1,10 @@
 ---
-title: API Reference
+title: Syrinx API Reference
 
 language_tabs:
-  - shell
-  - ruby
-  - python
+  - shell: cURL
+  - javascript: node.js
+  - java
 
 toc_footers:
   - <a href='#'>Sign Up for a Developer Key</a>
@@ -18,151 +18,426 @@ search: true
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+Welcome to the Syrinx Healthcare IT Platform API.  You can use our API to access endpoints which provide for the collection, aggregation, ingestion and enrichment, and integration of a variety of patient and consumer data sources including EHR patient data.
 
-We have language bindings in Shell, Ruby, and Python! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
+## Client Libraries
 
-This example API documentation page was created with [Slate](http://github.com/tripit/slate). Feel free to edit it and use it as a base for your own API's documentation.
+In addition to the REST api, we also offer SDKs in various languages to make it easier for developers to work with the API.  
+
+Supported Languages are:
+
+[javascript](http://github.com)
+
+[java](http://github.com)
+
+## Client Libraries Installation
+
+Please see the instructions for installing your desired client library by selecting the language on the right.
+
+```shell
+```
+
+```javascript
+npm install syrinx-client
+```
+
+```java
+j1 placeholder 
+```
+
 
 # Authentication
 
 > To authorize, use this code:
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-```
-
 ```shell
 # With shell, you can just pass the correct header with each request
 curl "api_endpoint_here"
-  -H "Authorization: meowmeowmeow"
+  -H "Content-Type: application/json"
+  -H "clientToken: <Some Client Token>"
 ```
 
-> Make sure to replace `meowmeowmeow` with your API key.
+```javascript
+var syrinx_client = require('syrinx-client');
+syrinx_client.config({url: 'http://example.com:8080/rest/v1', clientToken: '123456789'});
+```
 
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
+```java
+// Syrinx Client Object
+import org.merck.syrinx.client;
+SyrinxClient syrinx = new SyrinxClient();
 
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
+// Configure
+String url, clientToken;
+syrinx.setUrl(url);
+syrinx.setClientToken(clientToken);
+```
 
-`Authorization: meowmeowmeow`
+
+> Make sure to set clientToken with your API key.
+
+Syrinx uses API keys to allow access to the API.  Syrinx expects for the API key to be included in all API requests to the server in a header that looks like the following:
+
+`clientToken: <Some Client Token>`
 
 <aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
+You must replace <code>Some Client Token</code> with your API key.
 </aside>
 
-# Kittens
+# Ingest
+The ingest data endpoints are used to add data into the patient data store, any external EMR/EHR systems data can be imported into this patient data store using this API.
 
-## Get All Kittens
+## Ingest Formats Accepted
+The ingest process uses the Blue Button Parser to convert complex data formats to JSON formats.  Currently 
+BlueButton supports the C32, CMS, and CCDA data formats.  The following formats: CCDA, C32, CDA are expressed using the xml data standard.
 
-```ruby
-require 'kittn'
+In addition, if your data files are already in JSON format, they can be ingested directly by the system.
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
+## Ingest a Single File
+Submit an ingest job for asynchronous processing for a single file.
+
+
+```shell
+# Ingest a Single File
+
+curl -X "POST" "http://example.com/rest/v1/syrinx/ingest-data" \
+	-H "Content-Type: application/json" \
+	-H "clientToken: 123456789" \
+	-d $'{
+    "dataType" : "filepath",
+    "data" : "/home/ubuntu/hit_deploy/sample_ccdas/EMERGE/Patient-1.xml",   
+    "dataFormat"   : "xml",
+    "callback_url" : ""
+}'
+```
+```shell
+# JSON Result
+
+{
+    "jobId": "JOB1442337673507",
+    "message": "Accepted",
+    "status": 202
+}
+```
+```javascript
+// Ingest a Single File
+
+var ingestClient = new syrinx_client.ingest(); 
+
+var data = {
+    "dataType"     : "filepath", 
+	"data"         : "/home/ubuntu/hit_deploy/sample_ccdas/EMERGE/Patient-1.xml",
+	"dataFormat"   : "xml",
+	"callback_url" : "",              
+}
+
+var jobId = ingestClient.ingest(data, function(err, results) {
+
+	if(err) 
+		console.err(err);
+	else 
+		console.log(results);
+		
+});
+
+
+
+// Ingest with Callback
+
+var jobId = ingestClient.ingest(data, function(err, results) {
+    
+     if(err)
+     	console.log(err);
+     else 
+     	console.log(results);
+});
+
+
+// Ingest without Callback
+
+var jobId = ingestClient.ingest(data);
+
+var results = ingestClient.status(jobId); // This is a blocking call 
+
+
+
+```
+```java
+// Ingest a Single File
+
+import org.merck.syrinx.client.ingest.inputObject;
+import org.merck.syrinx.client.ingest.outputObject;
+import org.merck.syrinx.client.ingest.inputArray;
+import org.merck.syrinx.client.ingest.outputArray;
+
+InputObject<String,Object> data = new InputObject<String, Object>();
+
+{
+    "dataType"     : "filepath", 
+	"data"         : "/home/ubuntu/hit_deploy/sample_ccdas/EMERGE/Patient-1.xml",   
+	"dataFormat"   : "xml",
+	"callback_url" : ""                              
+}
+
+Ingest ingest = syrinx.ingest();
+
+String jobId = ingest.ingest(data, new StatusListener() {
+   @Override 
+   public void results(String error, OutputObject results) {
+   		if(error != null)
+   			System.out.println("Error  " + error);
+   }
+});
 ```
 
-```python
-import kittn
 
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
+### Request
+
+`POST http://example.com/rest/v1/syrinx/ingest-data`
+
+### Parameters
+
+Parameter | Req | Value | Description
+--------- | ------- | ------ | -----------
+dataType | Y | "filepath" | Indicates whether the data is embedded in request or resides on server
+data | Y | "/path/to/file" | Path to file or directory on the server
+dataFormat | Y | "xml:json:rdf" | Format of the file to be ingested
+callback_url | N | "http://example.com/url" | Used to call back an endpoint with the status of the request
+
+### Return
+If the request succeeded, then HTTP 202 is returned along with a job id, meaning that the job was accepted for processing.
+
+Note, if an invalid ccda format is given, a status code of 412 is returned.
+
+<aside class="success">
+Remember to call the Status endpoint to get the status of your submitted job.
+</aside>
+
+### Status of Job
+
+```shell
+# Get the Status
+
+curl -X "GET" "http://example.com/rest/v1/syrinx/ingest-data/status/JOB1442574337569" \
+	-H "Content-Type: application/json" \
+	-H "clientToken: 123456789" \
+	-d "{}"
 ```
 
 ```shell
-curl "http://example.com/api/kittens"
-  -H "Authorization: meowmeowmeow"
-```
 
-> The above command returns JSON structured like this:
+# JSON Result
 
-```json
 [
-  {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
-  },
-  {
-    "id": 2,
-    "name": "Isis",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
-  }
+    {
+        "message": "COMPLETE",
+        "error": [
+            "nullFlavor alert:  missing but required street_lines in Address -> Patient -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required text in ResultObservation -> ResultsOrganizer -> resultsSection -> CCD",
+            "nullFlavor alert:  missing but required precondition in medicationActivity -> medicationsSection -> CCD",
+            "nullFlavor alert:  missing but required precondition in medicationActivity -> medicationsSection -> CCD",
+            "nullFlavor alert:  missing but required precondition in medicationActivity -> medicationsSection -> CCD",
+            "nullFlavor alert:  missing but required precondition in medicationActivity -> medicationsSection -> CCD",
+            "nullFlavor alert:  missing but required precondition in medicationActivity -> medicationsSection -> CCD",
+            "nullFlavor alert:  missing but required precondition in medicationActivity -> medicationsSection -> CCD",
+            "nullFlavor alert:  missing but required precondition in medicationActivity -> medicationsSection -> CCD",
+            "nullFlavor alert:  missing but required precondition in medicationActivity -> medicationsSection -> CCD"
+        ],
+        "jobId": "JOB1442574337569",
+        "status": 202,
+        "data": []
+    }
 ]
 ```
 
-This endpoint retrieves all kittens.
+```javascript
+// Status of Specific Job
 
-### HTTP Request
+// Example of Blocking Call
+var results = ingestClient.status(jobId); 
 
-`GET http://example.com/api/kittens`
 
-### Query Parameters
+// Example of Asynchronous Call
+var results = ingestClient.status(jobId, function(err, results) {
+	if(err) 
+		console.log(err);
+	else 
+		console.log(results);
+}); 
 
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
 
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
-</aside>
+//Status of All Jobs
 
-## Get a Specific Kitten
+var results = ingestClient.status(); // Blocking 
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
+var results = ingestClient.status(function(err, results) {
+	if(err) 
+		console.log(err);
+	else 
+		console.log(results);
+});
 ```
 
-```python
-import kittn
+```java
+// Status of Specific Job
 
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
+ingest.status(data, new StatusListener() {   
+   @Override 
+   public void results(String error, OutputObject results) {
+   	if(error != null)
+   		System.out.println("Error  " + error);
+   }
+});
+
+IngestObject output = ingest.status(jobId);
+
+
+// Status of All Jobs
+
+ingest.status(new StatusListener() {  
+   @Override 
+   public void results(String error, OutputObject results) {
+   	if(error != null)
+   		System.out.println("Error  " + error);
+   }
+});
+
+IngestObject output = ingest.status();
 ```
 
+
+### Request
+
+`GET http://example.com/rest/v1/syrinx/ingest-data/status/{jobId}`
+
+### Parameters
+
+Parameter | Req | Value | Description
+--------- | ------- | ------ | -----------
+{jobId} | N | "" | The job id of a previously submitted job.  If the job id is not provided, then the endpoint will return the status of all jobs.
+
+### Return
+If the request succeeded, then HTTP 202 is returned along with COMPLETE message.  Errors during parsing are shown in an error array.
+
+Question:  Shouldn't the API be returning Data in the data section?
+
+## Ingest Multiple Files
+
+Ingesting multiple files uses the same API Signature as ingesting a single file.  Instead, the data value will point to a directory on the server where the files are located.
+
+In addition, the data field in the JSON Return will contain the child job ids.  You may call the status endpoint for each of these child jobs.
+ 
 ```shell
-curl "http://example.com/api/kittens/2"
-  -H "Authorization: meowmeowmeow"
+# Ingest a Directory
+
+curl -X "POST" "http://example.com/rest/v1/syrinx/ingest-data" \
+        -H "Content-Type: application/json" \
+        -H "clientToken: 123456789" \
+        -d $'{
+    "dataType" : "filepath",
+    "data" : "/home/ubuntu/hit_deploy/sample_ccdas/demo/",
+    "dataFormat"   : "xml",
+    "callback_url" : ""
+}'
 ```
+```shell
+# JSON Result
 
-> The above command returns JSON structured like this:
-
-```json
 {
-  "id": 2,
-  "name": "Isis",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
+    "jobId": "JOB1442355494309",
+    "message": "Accepted",
+    "status": 202
 }
+
+
+# Get the Status
+
+curl -X "GET" "http://example.com/rest/v1/syrinx/ingest-data/status/JOB1442574337569" \
+        -H "Content-Type: application/json" \
+        -H "clientToken: 123456789" \
+        -d "{}"
+
+# JSON Result
+
+[
+    {
+        "message": "COMPLETE",
+        "error": [],
+        "jobId": "JOB1442608173742",
+        "status": 202,
+        "data": [
+            "JOB1442608173742_001",
+            "JOB1442608173742_011",
+            "JOB1442608173742_021",
+            "JOB1442608173742_031"
+        ]
+    }
+]
+
+
+
+
 ```
 
-This endpoint retrieves a specific kitten.
+```javascript
+```
 
-<aside class="warning">If you're not using an administrator API key, note that some kittens will return 403 Forbidden if they are hidden for admins only.</aside>
+```java
+```
 
-### HTTP Request
+## Ingest Embedded Data
+### Request
 
-`GET http://example.com/kittens/<ID>`
+`POST http://example.com/rest/v1/syrinx/ingest-data`
 
-### URL Parameters
+### Parameters
 
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to retrieve
+Parameter | Req | Value | Description
+--------- | ------- | ------ | -----------
+dataType | Y | "embedded" | Indicates whether the data is embedded in request or resides on server
+data | Y | "" | String representation of actual contents
+dataFormat | Y | "xml:json:rdf" | Format of the file to be ingested
+callback_url | N | "http://example.com/url" | Used to call back an endpoint with the status of the request
 
+### Return
+If the request succeeded, then HTTP 202 is returned along with a job id, meaning that the job was accepted for processing.
+
+## Status of Ingest
+
+### Status of All Jobs
+`GET http://example.com/rest/v1/syrinx/ingest-data/status`
+
+### Status of Job
+#### Request
+
+`GET http://example.com/rest/v1/syrinx/ingest-data/status/{jobId}`
+
+#### Parameters
+
+Parameter | Req | Value | Description
+--------- | ------- | ------ | -----------
+{jobId} | N | "" | The job id of a previously submitted job.
+
+#### Return
+If the request succeeded, then HTTP 202 is returned along with COMPLETE message.  Errors during parsing are shown in an error array.
+
+### Status by Job State
+GET http://example.com/rest/v1/syrinx/ingest-data?status={value}
+
+where {value} is one of COMPLETE, FAILED, [COMPLETE_WITH_ERROR] <= Check this
+
+# Standardize
+
+# Filter
+
+# Aggregate
