@@ -12,7 +12,7 @@ curl -X "POST" "http://example.com/rest/v1/syrinx/c" \
 	  "filterMetadata": "{\'Filter Name\': \'Vitals of All Patients\'}",
 	  "filter": "{}",
 	  "projection": "data.vitals",
-	  "storeFilter": "true",
+	  "storedFilter": "true",
 	  "callback_url": "" 
 }'
 
@@ -36,7 +36,7 @@ Parameter | Req | Value | Description
 filterMetadata | N | "{}" | A JSON object with key value pairs representing meta data that can be stored with the filter.
 filter | Y | "{}", "[]", "filterId" | Can be a JSON object, array, or string.  JSON Objects conform to MongoDB query rules. If an array is passed, the API would expect either a JSON object or a string as part of the array. If the array element is a string then it is treated as filterId whereas JSON Object is treated as filter condition.  Please see specific examples of filter parameter below. 
 projection | N | "" | Limits the fields to return for all matching documents.  Projection is specified as a comma separated list of fields.
-storeFilter | Y | "true:false" | If the filter is to be used in other api calls (like Aggregate or Scoring), set this to "true". 
+storedFilter | Y | "true:false" | If the filter is to be used in other api calls (like Aggregate or Scoring), set this to "true". 
 callback_url | N | "http://example.com/url" | Used to call back an endpoint with the status of the request
 
 ### Return
