@@ -7,9 +7,9 @@ Filters allow you to retrieve records from the Syrinx data store based on a spec
 
 curl -X "POST" "http://example.com/rest/v1/syrinx/c" \
 	-H "Content-Type: application/json" \
-	-H "clientToken: ODk3YzBkMjEyMThhNTcxNzhlNmJkMjlkYjExMmM1ZmViZDM1YTViNWFkMTFlZjhmYTk3Mjc1YmY0ZDMxMjNkZQ" \
+	-H "clientToken: 123456789" \
 	-d $'{     
-	  "metadata": "{\'Filter Name\': \'Vitals of All Patients\'}",
+	  "filterMetadata": "{\'Filter Name\': \'Vitals of All Patients\'}",
 	  "filter": "{}",
 	  "projection": "data.vitals",
 	  "storeFilter": "true",
@@ -35,7 +35,7 @@ Parameter | Req | Value | Description
 --------- | ------- | ------ | -----------
 filterMetadata | N | "{}" | A JSON object with key value pairs representing meta data that can be stored with the filter.
 filter | Y | "{}", "[]", "filterId" | Can be a JSON object, array, or string.  JSON Objects conform to MongoDB query rules. If an array is passed, the API would expect either a JSON object or a string as part of the array. If the array element is a string then it is treated as filterId whereas JSON Object is treated as filter condition.  Please see specific examples of filter parameter below. 
-projection | N | "" | Comma separated list of fields 
+projection | N | "" | Limits the fields to return for all matching documents.  Projection is specified as a comma separated list of fields.
 storeFilter | Y | "true:false" | If the filter is to be used in other api calls (like Aggregate or Scoring), set this to "true". 
 callback_url | N | "http://example.com/url" | Used to call back an endpoint with the status of the request
 
@@ -67,7 +67,7 @@ filter = [{"data.demographics.gender":"Male"}, "4feabc09-01e7-4762-9443-a59d7b1b
 
 curl -X "GET" "http://example.com/rest/v1/syrinx/filter/status/JOB1442862119598" \
 	-H "Content-Type: application/json" \
-	-H "clientToken: ODk3YzBkMjEyMThhNTcxNzhlNmJkMjlkYjExMmM1ZmViZDM1YTViNWFkMTFlZjhmYTk3Mjc1YmY0ZDMxMjNkZQ"
+	-H "clientToken: 123456789"
 
 
 # JSON Result
@@ -163,7 +163,7 @@ If the request succeeded, then HTTP 202 is returned along with COMPLETE message.
 
 curl -X "GET" "http://example.com/rest/v1/syrinx/filter?storedFilter=true" \
 	-H "Content-Type: application/json" \
-	-H "clientToken: ODk3YzBkMjEyMThhNTcxNzhlNmJkMjlkYjExMmM1ZmViZDM1YTViNWFkMTFlZjhmYTk3Mjc1YmY0ZDMxMjNkZQ"
+	-H "clientToken: 123456789"
 
 # JSON Result
 
@@ -178,7 +178,7 @@ curl -X "GET" "http://example.com/rest/v1/syrinx/filter?storedFilter=true" \
 
 curl -X "GET" "http://example.com/rest/v1/syrinx/filter/status/JOB1443136920365" \
     -H "Content-Type: application/json" \
-    -H "clientToken: ODk3YzBkMjEyMThhNTcxNzhlNmJkMjlkYjExMmM1ZmViZDM1YTViNWFkMTFlZjhmYTk3Mjc1YmY0ZDMxMjNkZQ"
+    -H "clientToken: 123456789"
 
 # JSON Result 
 
