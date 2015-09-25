@@ -17,6 +17,7 @@ includes:
   - standardize
   - filter
   - aggregate
+  - scoring
   - errors
 
 search: true
